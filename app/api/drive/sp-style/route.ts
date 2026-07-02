@@ -1,14 +1,11 @@
 import { requireSession } from '@/lib/session';
 import { getGoogleSheetId } from '@/lib/sheets';
-import { googleSheetsJson, sheetAccessError } from '@/app/api/google-drive/sheets-debug';
+import { sheetAccessError } from '@/app/api/google-drive/sheets-debug';
+import { readSheetValues } from '@/lib/sheet-values';
 
 export const runtime = 'nodejs';
 
 const SCHEDULE_RANGE = 'Schedule!C:AH';
-
-type ValuesResponse = {
-  values?: string[][];
-};
 
 function normalize(value: string) {
   return value.trim().replace(/\s+/g, '').toLowerCase();
@@ -27,8 +24,7 @@ export async function GET(req: Request) {
   console.log('[SP lookup] Google Sheets range:', SCHEDULE_RANGE);
   console.log('[SP lookup] Google API method: spreadsheets.values.get');
 
-  const valuesUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(SCHEDULE_RANGE)}`;
-  const valuesResult = await googleSheetsJson<ValuesResponse>(valuesUrl, session.accessToken);
+  const valuesResult = await readSheetValues(spreadsheetId, SCHEDULE_RANGE, session.accessToken, 'SP lookup');
   if ('error' in valuesResult) return Response.json({ error: sheetAccessError(valuesResult.error) }, { status: valuesResult.error.status });
 
   const wantedSp = normalize(sp);

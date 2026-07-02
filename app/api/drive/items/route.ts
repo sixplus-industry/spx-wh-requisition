@@ -1,14 +1,11 @@
 import { requireSession } from '@/lib/session';
 import { getGoogleSheetId } from '@/lib/sheets';
-import { googleSheetsJson, sheetAccessError } from '@/app/api/google-drive/sheets-debug';
+import { sheetAccessError } from '@/app/api/google-drive/sheets-debug';
+import { readSheetValues } from '@/lib/sheet-values';
 
 export const runtime = 'nodejs';
 
 const ITEMS_RANGE = 'Items!A:B';
-
-type ValuesResponse = {
-  values?: string[][];
-};
 
 function normalize(value: string) {
   return value.trim().replace(/\s+/g, ' ').toLowerCase();
@@ -38,8 +35,7 @@ export async function GET(req: Request) {
   console.log('[Items lookup] Google Sheets range:', ITEMS_RANGE);
   console.log('[Items lookup] Google API method: spreadsheets.values.get');
 
-  const valuesUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(ITEMS_RANGE)}`;
-  const valuesResult = await googleSheetsJson<ValuesResponse>(valuesUrl, session.accessToken);
+  const valuesResult = await readSheetValues(spreadsheetId, ITEMS_RANGE, session.accessToken, 'Items lookup');
   if ('error' in valuesResult) return Response.json({ error: sheetAccessError(valuesResult.error) }, { status: valuesResult.error.status });
 
   let currentType = '';

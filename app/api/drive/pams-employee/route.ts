@@ -1,14 +1,11 @@
 import { requireSession } from '@/lib/session';
 import { getGoogleSheetId } from '@/lib/sheets';
-import { googleSheetsJson, sheetAccessError } from '@/app/api/google-drive/sheets-debug';
+import { sheetAccessError } from '@/app/api/google-drive/sheets-debug';
+import { readSheetValues } from '@/lib/sheet-values';
 
 export const runtime = 'nodejs';
 
 const PAMS_RANGE = 'PAMS';
-
-type ValuesResponse = {
-  values?: string[][];
-};
 
 const employeeKeys = ['employee #', 'employee#', 'employee no', 'employee no.', 'employee id', 'emp #', 'emp no', 'id'];
 const sectionKeys = ['section', 'line', 'department', 'dept'];
@@ -40,8 +37,7 @@ export async function GET(req: Request) {
   console.log('[PAMS lookup] Google Sheets range:', PAMS_RANGE);
   console.log('[PAMS lookup] Google API method: spreadsheets.values.get');
 
-  const valuesUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(PAMS_RANGE)}`;
-  const valuesResult = await googleSheetsJson<ValuesResponse>(valuesUrl, session.accessToken);
+  const valuesResult = await readSheetValues(spreadsheetId, PAMS_RANGE, session.accessToken, 'PAMS lookup');
   if ('error' in valuesResult) return Response.json({ error: sheetAccessError(valuesResult.error) }, { status: valuesResult.error.status });
 
   const [headerRow, ...rows] = valuesResult.data.values ?? [];

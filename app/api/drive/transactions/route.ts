@@ -1,6 +1,7 @@
 import { requireSession } from '@/lib/session';
 import { getGoogleSheetId } from '@/lib/sheets';
 import { googleSheetsJson, sheetAccessError } from '@/app/api/google-drive/sheets-debug';
+import { readSheetValues } from '@/lib/sheet-values';
 
 export const runtime = 'nodejs';
 
@@ -153,8 +154,7 @@ export async function GET(req: Request) {
   console.log('[Transaction list] Google Sheets range:', TRANSACTION_RANGE);
   console.log('[Transaction list] Google API method: spreadsheets.values.get');
 
-  const valuesUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(TRANSACTION_RANGE)}`;
-  const result = await googleSheetsJson<ValuesResponse>(valuesUrl, session.accessToken);
+  const result = await readSheetValues(spreadsheetId, TRANSACTION_RANGE, session.accessToken, 'Transaction list');
   if ('error' in result) {
     return Response.json({ error: sheetAccessError(result.error) }, { status: result.error.status });
   }
