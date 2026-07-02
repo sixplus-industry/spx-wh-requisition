@@ -19,7 +19,7 @@ Set these in Vercel Project Settings > Environment Variables:
 ```bash
 GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
-GOOGLE_REDIRECT_URI=https://spx-wh-requisition-your-team.vercel.app/api/auth/callback
+GOOGLE_REDIRECT_URI=https://spx-wh-requisition-your-team.vercel.app/api/auth/callback/google
 GOOGLE_SHEET_ID=your-new-native-google-sheet-id
 SESSION_SECRET=replace-with-at-least-32-random-characters
 NEXT_PUBLIC_APP_URL=https://spx-wh-requisition-your-team.vercel.app
@@ -28,7 +28,7 @@ TRANSACTION_DELETE_USER=replace-with-new-delete-username
 TRANSACTION_DELETE_PASSWORD=replace-with-new-delete-password
 ```
 
-For local development, use `http://localhost:3000/api/auth/callback` as the redirect URI.
+For local development, use `http://localhost:3000/api/auth/callback/google` as the redirect URI.
 
 ## Google Cloud setup
 
@@ -72,7 +72,7 @@ vercel --prod
 ## Important API routes
 
 - `GET /api/auth/login` starts Google OAuth.
-- `GET /api/auth/callback` exchanges the auth code and sets the encrypted session cookie.
+- `GET /api/auth/callback/google` exchanges the auth code and sets the encrypted session cookie.
 - `GET /api/auth/me` returns the signed-in profile.
 - `POST /api/auth/logout` clears the session cookie.
 - `GET /api/drive/files` lists Excel files from Drive.
