@@ -1,4 +1,5 @@
 import { requireSession } from '@/lib/session';
+import { getGoogleSheetId } from '@/lib/sheets';
 import { googleSheetsJson, sheetAccessError } from '@/app/api/google-drive/sheets-debug';
 
 export const runtime = 'nodejs';
@@ -103,8 +104,7 @@ export async function POST(req: Request) {
   const session = await requireSession();
   if (session instanceof Response) return session;
 
-  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  if (!spreadsheetId) return Response.json({ error: 'GOOGLE_SHEET_ID is not configured.' }, { status: 500 });
+  const spreadsheetId = getGoogleSheetId();
 
   const body = await req.json().catch(() => ({})) as { transaction?: TransactionPayload };
   if (!body.transaction) return Response.json({ error: 'transaction is required' }, { status: 400 });
@@ -147,8 +147,7 @@ export async function GET(req: Request) {
   const session = await requireSession();
   if (session instanceof Response) return session;
 
-  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  if (!spreadsheetId) return Response.json({ error: 'GOOGLE_SHEET_ID is not configured.' }, { status: 500 });
+  const spreadsheetId = getGoogleSheetId();
 
   console.log('[Transaction list] GOOGLE_SHEET_ID:', spreadsheetId);
   console.log('[Transaction list] Google Sheets range:', TRANSACTION_RANGE);
@@ -184,8 +183,7 @@ export async function PATCH(req: Request) {
   const session = await requireSession();
   if (session instanceof Response) return session;
 
-  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  if (!spreadsheetId) return Response.json({ error: 'GOOGLE_SHEET_ID is not configured.' }, { status: 500 });
+  const spreadsheetId = getGoogleSheetId();
 
   const body = await req.json().catch(() => ({})) as {
     sheetRow?: number;
@@ -225,8 +223,7 @@ export async function DELETE(req: Request) {
   const session = await requireSession();
   if (session instanceof Response) return session;
 
-  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  if (!spreadsheetId) return Response.json({ error: 'GOOGLE_SHEET_ID is not configured.' }, { status: 500 });
+  const spreadsheetId = getGoogleSheetId();
 
   const body = await req.json().catch(() => ({})) as {
     sheetRow?: number;

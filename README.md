@@ -20,7 +20,7 @@ Set these in Vercel Project Settings > Environment Variables:
 GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
 GOOGLE_REDIRECT_URI=https://spx-wh-requisition-your-team.vercel.app/api/auth/callback/google
-GOOGLE_SHEET_ID=your-new-native-google-sheet-id
+GOOGLE_SHEET_ID=1YnTR2QSU3XOl8TTKhegorso6X4oPiWBzuB52zpQFFVc
 SESSION_SECRET=replace-with-at-least-32-random-characters
 NEXT_PUBLIC_APP_URL=https://spx-wh-requisition-your-team.vercel.app
 NEXT_PUBLIC_APP_NAME=SPX WH Requisition

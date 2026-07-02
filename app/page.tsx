@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { REQUEST_TRACKING_URL } from '@/lib/sheets';
 
 type User = { name?: string; email?: string; picture?: string } | null;
 type DriveFile = { id: string; name: string; mimeType: string; modifiedTime?: string; webViewLink?: string };
@@ -26,7 +27,6 @@ type Transaction = {
 
 type ImportSheets = Record<string, unknown[]>;
 
-const requestTrackingUrl = 'https://docs.google.com/spreadsheets/d/1V1_13AUctNuiJnhlJu_K2-Qrl-z_iiRY2crdn-OSATc/edit?gid=161104161#gid=161104161';
 const whStatusOptions = ['Not Yet Arrived', 'Preparing', 'Ready for Pick Up'];
 const wbStatusOptions = ['Partial Received', 'All Received'];
 const tableColumnWidths = [126, 68, 118, 128, 154, 116, 64, 118, 128, 112, 104, 104, 164, 228, 176, 228];
@@ -611,7 +611,7 @@ export default function Page() {
         <h1>Warehouse Accessory Requisition <span>ការស្នើសុំគ្រឿងសម្ភារៈដេរពីឃ្លាំងសម្ភារៈ</span></h1>
         <div className="topbar-actions">
           <a className="google-login" href="/api/auth/login">Sign in with Google</a>
-          <a href={requestTrackingUrl} target="_blank" rel="noreferrer">Google Drive</a>
+          <a href={REQUEST_TRACKING_URL} target="_blank" rel="noreferrer">Google Drive</a>
         </div>
       </header>
 

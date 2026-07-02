@@ -1,4 +1,5 @@
 import { requireSession } from '@/lib/session';
+import { getGoogleSheetId } from '@/lib/sheets';
 import { googleSheetsJson, sheetAccessError } from '@/app/api/google-drive/sheets-debug';
 
 export const runtime = 'nodejs';
@@ -33,8 +34,7 @@ export async function GET(req: Request) {
   const session = await requireSession();
   if (session instanceof Response) return session;
 
-  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  if (!spreadsheetId) return Response.json({ error: 'GOOGLE_SHEET_ID is not configured.' }, { status: 500 });
+  const spreadsheetId = getGoogleSheetId();
 
   console.log('[PAMS lookup] GOOGLE_SHEET_ID:', spreadsheetId);
   console.log('[PAMS lookup] Google Sheets range:', PAMS_RANGE);
