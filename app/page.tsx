@@ -604,12 +604,20 @@ export default function Page() {
     setMessage(res.ok ? `Saved to Drive: ${data.file?.name}` : errorMessage(data, 'Save to Drive failed.'));
   }
 
+  async function signOut() {
+    await fetch('/api/auth/logout', { method: 'POST' }).catch(() => undefined);
+    setUser(null);
+    setMessage('Signed out. Sign in with the Google account that has access to SPX WH Request.');
+  }
+
   return (
     <main className="page-shell">
       <header className="topbar">
         <h1>Warehouse Accessory Requisition <span>ការស្នើសុំគ្រឿងសម្ភារៈដេរពីឃ្លាំងសម្ភារៈ</span></h1>
         <div className="topbar-actions">
-          <a className="google-login" href="/api/auth/login">Sign in with Google</a>
+          {user && <span className="signed-in-email">Signed in: {user.email}</span>}
+          <a className="google-login" href="/api/auth/login">{user ? 'Switch Google Account' : 'Sign in with Google'}</a>
+          {user && <button className="google-signout" type="button" onClick={signOut}>Sign out</button>}
           <a href="https://docs.google.com/spreadsheets/d/1YnTR2QSU3XOl8TTKhegorso6X4oPiWBzuB52zpQFFVc/edit?gid=626660700#gid=626660700" target="_blank" rel="noreferrer">Google Drive</a>
         </div>
       </header>
