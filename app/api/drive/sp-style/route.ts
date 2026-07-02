@@ -5,7 +5,12 @@ import { readSheetValues } from '@/lib/sheet-values';
 
 export const runtime = 'nodejs';
 
-const SCHEDULE_RANGE = 'Schedule!C:AH';
+const SCHEDULE_RANGE = 'Schedule!A:AH';
+const LINE_COLUMN_INDEX = 0;
+const SP_COLUMN_INDEX = 4;
+const STYLE_COLUMN_INDEX = 5;
+const ORDER_QTY_COLUMN_INDEX = 14;
+const INLINE_DATE_COLUMN_INDEX = 20;
 
 function normalize(value: string) {
   return value.trim().replace(/\s+/g, '').toLowerCase();
@@ -28,14 +33,14 @@ export async function GET(req: Request) {
   if ('error' in valuesResult) return Response.json({ error: sheetAccessError(valuesResult.error) }, { status: valuesResult.error.status });
 
   const wantedSp = normalize(sp);
-  const match = (valuesResult.data.values ?? []).find((row) => normalize(String(row[5] ?? '')) === wantedSp);
+  const match = (valuesResult.data.values ?? []).find((row) => normalize(String(row[SP_COLUMN_INDEX] ?? '')) === wantedSp);
   if (!match) return Response.json({ error: 'SP # was not found in Schedule.' }, { status: 404 });
 
   return Response.json({
-    line: String(match[0] ?? '').trim(),
-    sp: String(match[5] ?? '').trim() || sp.trim(),
-    style: String(match[8] ?? '').trim(),
-    orderQty: String(match[23] ?? '').trim(),
-    inlineDate: String(match[31] ?? '').trim()
+    line: String(match[LINE_COLUMN_INDEX] ?? '').trim(),
+    sp: String(match[SP_COLUMN_INDEX] ?? '').trim() || sp.trim(),
+    style: String(match[STYLE_COLUMN_INDEX] ?? '').trim(),
+    orderQty: String(match[ORDER_QTY_COLUMN_INDEX] ?? '').trim(),
+    inlineDate: String(match[INLINE_DATE_COLUMN_INDEX] ?? '').trim()
   });
 }
