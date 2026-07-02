@@ -494,7 +494,7 @@ export default function Page() {
   }
 
   function confirmDeleteLogin() {
-    if (deleteUser === 'sixplus_wh' && deletePassword === 'WH777') {
+    if (deleteUser === 'spx_wh' && deletePassword === 'WH777') {
       setDeleteAuthorized(true);
       setDeleteModalOpen(false);
       setMessage('Delete mode enabled.');

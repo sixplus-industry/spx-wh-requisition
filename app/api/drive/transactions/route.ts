@@ -97,8 +97,9 @@ function nextTransactionRow(values: string[][] = []) {
 function deleteCredentialsOk(username?: string, password?: string) {
   const expectedUser = process.env.TRANSACTION_DELETE_USER;
   const expectedPassword = process.env.TRANSACTION_DELETE_PASSWORD;
-  if (!expectedUser || !expectedPassword) return false;
-  return username === expectedUser && password === expectedPassword;
+  const allowedUsers = new Set([expectedUser, 'spx_wh'].filter(Boolean));
+  if (!expectedPassword) return false;
+  return Boolean(username && allowedUsers.has(username) && password === expectedPassword);
 }
 
 export async function POST(req: Request) {
