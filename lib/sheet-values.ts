@@ -5,8 +5,6 @@ export type ValuesResponse = {
   values?: string[][];
 };
 
-const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-
 function columnIndex(column: string) {
   return column.toUpperCase().split('').reduce((total, char) => total * 26 + char.charCodeAt(0) - 64, 0) - 1;
 }
@@ -20,20 +18,18 @@ function parseRange(range: string) {
   return { sheetName, startColumn, endColumn };
 }
 
-async function driveExportRows(spreadsheetId: string, range: string, accessToken: string): Promise<GoogleJsonResult<ValuesResponse>> {
-  const params = new URLSearchParams({ mimeType: XLSX_MIME });
-  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${spreadsheetId}/export?${params.toString()}`, {
-    headers: { Authorization: `Bearer ${accessToken}` }
+async function sharedSheetExportRows(spreadsheetId: string, range: string): Promise<GoogleJsonResult<ValuesResponse>> {
+  const res = await fetch(`https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=xlsx`, {
+    headers: { Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }
   });
 
   if (!res.ok) {
-    const detail = await res.json().catch(async () => ({ error: { message: await res.text().catch(() => '') } }));
-    const apiError = detail?.error ?? {};
+    const detail = await res.text().catch(() => '');
     return {
       error: {
-        message: String(apiError.message || `Google Drive export failed with ${res.status}`),
+        message: detail || `Shared Google Sheet export failed with ${res.status}`,
         status: res.status,
-        code: typeof apiError.code === 'number' ? apiError.code : undefined
+        code: res.status
       }
     };
   }
@@ -67,11 +63,11 @@ export async function readSheetValues(spreadsheetId: string, range: string, acce
   const result = await googleSheetsJson<ValuesResponse>(valuesUrl, accessToken);
   if (!('error' in result)) return result;
 
-  console.warn(`[${logPrefix}] Google Sheets API read failed; trying Drive XLSX export fallback.`, {
+  console.warn(`[${logPrefix}] Google Sheets API read failed; trying shared XLSX export fallback.`, {
     status: result.error.status,
     code: result.error.code,
     message: result.error.message
   });
 
-  return driveExportRows(spreadsheetId, range, accessToken);
+  return sharedSheetExportRows(spreadsheetId, range);
 }
