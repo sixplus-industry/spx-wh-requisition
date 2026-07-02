@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { REQUEST_TRACKING_URL } from '@/lib/sheets';
 
 type User = { name?: string; email?: string; picture?: string } | null;
 type DriveFile = { id: string; name: string; mimeType: string; modifiedTime?: string; webViewLink?: string };
@@ -611,7 +610,7 @@ export default function Page() {
         <h1>Warehouse Accessory Requisition <span>ការស្នើសុំគ្រឿងសម្ភារៈដេរពីឃ្លាំងសម្ភារៈ</span></h1>
         <div className="topbar-actions">
           <a className="google-login" href="/api/auth/login">Sign in with Google</a>
-          <a href={REQUEST_TRACKING_URL} target="_blank" rel="noreferrer">Google Drive</a>
+          <a href="https://docs.google.com/spreadsheets/d/1YnTR2QSU3XOl8TTKhegorso6X4oPiWBzuB52zpQFFVc/edit?gid=626660700#gid=626660700" target="_blank" rel="noreferrer">Google Drive</a>
         </div>
       </header>
 

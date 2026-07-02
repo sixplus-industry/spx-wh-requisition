@@ -33,7 +33,7 @@ export function sheetAccessError(error: GoogleApiError) {
     return 'Spreadsheet not accessible by the signed-in Google account or wrong spreadsheet ID.';
   }
   if (error.status === 403 || error.code === 403) {
-    return 'The signed-in Google account does not have permission to access WH REQUEST & TRACKING. Click Sign in with Google and choose the account that has access to the spreadsheet.';
+    return 'The signed-in Google account does not have permission to access SPX WH Request. Click Sign in with Google and choose the account that has access to the spreadsheet.';
   }
   return error.message;
 }
