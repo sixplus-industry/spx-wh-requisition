@@ -28,6 +28,20 @@ type ImportSheets = Record<string, unknown[]>;
 
 const whStatusOptions = ['Not Yet Arrived', 'Preparing', 'Ready for Pick Up'];
 const wbStatusOptions = ['Partial Received', 'All Received'];
+const whStatusLabels: Record<string, string> = {
+  'Not Yet Arrived': 'មិនទាន់មកដល់ Not Yet Arrived',
+  Preparing: 'កំពុងរៀបចំសម្ភារៈ Preparing',
+  'Ready for Pick Up': 'សម្ភារៈរៀបចំរួចរាល់ Ready for Pick up'
+};
+const wbStatusLabels: Record<string, string> = {
+  'Partial Received': 'កំពុងដំណើរការទទួល Partial Received',
+  'All Received': 'ទទួលសម្ភារៈគ្រប់ All Received'
+};
+const accessoryTypeFilterOptions = [
+  { value: 'All Accessory Types', label: 'ប្រភេទសម្ភារៈទាំងអស់ All Accessory Types' },
+  { value: 'Sewing Accessories', label: 'សម្ភារៈដេរ Sewing Accessories' },
+  { value: 'Packing Accessories', label: 'សម្ភារៈវិចខ្ចប់ Packing Accessories' }
+];
 const tableColumnWidths = [126, 68, 118, 128, 154, 116, 64, 118, 128, 112, 104, 104, 164, 228, 176, 228];
 const deleteColumnWidth = 108;
 
@@ -668,9 +682,9 @@ export default function Page() {
           <input type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} />
           <label className="label-stack filter-label"><span>Accessory Type</span><span>ប្រភេទគ្រឿងបន្ថែម</span></label>
           <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-            <option>All Accessory Types</option>
-            <option>Sewing Accessories</option>
-            <option>Packing Accessories</option>
+            {accessoryTypeFilterOptions.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
           </select>
           <label>SP #</label>
           <input placeholder="Type SP #" value={spFilter} onChange={(e) => setSpFilter(e.target.value)} />
@@ -731,14 +745,14 @@ export default function Page() {
                   <td className={whStatusClass(row.status)}>
                     <select className="table-select" value={row.status || ''} onChange={(e) => handleWhStatusChange(row, e.target.value)}>
                       <option value=""></option>
-                      {whStatusOptions.map((option) => <option key={option}>{option}</option>)}
+                      {whStatusOptions.map((option) => <option key={option} value={option}>{whStatusLabels[option]}</option>)}
                     </select>
                   </td>
                   <td><input className="table-input wide" value={row.detailedRemark ?? ''} onChange={(e) => updateTransaction(row, { detailedRemark: e.target.value })} onBlur={() => syncTransactionFields(row)} /></td>
                   <td>
                     <select className="table-select" disabled={!wbEnabled} value={wbEnabled ? row.wbStatus || '' : ''} onChange={(e) => handleWbStatusChange(row, e.target.value)}>
                       <option value=""></option>
-                      {wbStatusOptions.map((option) => <option key={option}>{option}</option>)}
+                      {wbStatusOptions.map((option) => <option key={option} value={option}>{wbStatusLabels[option]}</option>)}
                     </select>
                   </td>
                   <td><input className="table-input wide" disabled={!wbEnabled} value={wbEnabled ? row.wbRemarks ?? '' : ''} onChange={(e) => updateTransaction(row, { wbRemarks: e.target.value })} onBlur={() => syncTransactionFields(row)} /></td>
