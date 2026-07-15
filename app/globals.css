@@ -83,6 +83,15 @@ input:focus, select:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba
 .filter-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
 .filter-row h2 { margin: 0 8px 0 0; color: var(--red); font-size: 28px; font-weight: 900; }
 .filter-row label { font-size: 15px; color: #475467; }
+.filter-row .section-title-stack { display: inline-flex; flex-direction: column; gap: 2px; line-height: 1.05; }
+.filter-row .section-title-stack span:first-child { font-size: 28px; }
+.filter-row .section-title-stack span:last-child { font-size: 18px; }
+.filter-row .filter-label { color: #475467; }
+.filter-row .filter-label span:first-child { font-size: 14px; }
+.filter-row .filter-label span:last-child { font-size: 12px; }
+.filter-row .command-label { align-items: center; line-height: 1.05; }
+.filter-row .command-label span:first-child { font-size: 14px; }
+.filter-row .command-label span:last-child { font-size: 12px; }
 .filter-row input, .filter-row select { min-height: 48px; }
 .filter-row input[type="date"] { width: 176px; }
 .filter-row select { width: 240px; }

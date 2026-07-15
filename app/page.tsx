@@ -300,7 +300,7 @@ export default function Page() {
       return;
     }
     setAccessoryUnlocked(true);
-    setMessage('Accessory request enabled.');
+    setMessage('Accessory request enabled. កំពុងបើកដំណើរការស្នើរសុំសម្ភារៈ');
   }
 
   function normalizeForDuplicate(value?: string) {
@@ -643,7 +643,7 @@ export default function Page() {
             </div>
             <label className="label-stack"><span>Item</span><span>វត្ថុ</span></label>
             <select disabled={!accessoryUnlocked || loadingItems} className="yellow item-select" value={item} onChange={(e) => setItem(e.target.value)}>
-              <option value="">{loadingItems ? 'Loading Items...' : itemOptions.length ? 'Select Item...' : 'No items found'}</option>
+              <option value="">{loadingItems ? 'Loading Items...' : itemOptions.length ? 'Select Item... ជ្រើសរើសវត្ថុ' : 'No items found'}</option>
               {itemOptions.map((option) => <option key={option}>{option}</option>)}
             </select>
           </div>
@@ -663,10 +663,10 @@ export default function Page() {
 
       <section className="transactions">
         <div className="filter-row">
-          <h2>TRANSACTION LIST</h2>
-          <label>Date Requested</label>
+          <h2 className="section-title-stack"><span>TRANSACTION LIST</span><span>បញ្ជីប្រតិបត្តិការ</span></h2>
+          <label className="label-stack filter-label"><span>Date Requested</span><span>កាលបរិច្ឆេទដែលបានស្នើសុំ</span></label>
           <input type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} />
-          <label>Accessory Type</label>
+          <label className="label-stack filter-label"><span>Accessory Type</span><span>ប្រភេទគ្រឿងបន្ថែម</span></label>
           <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
             <option>All Accessory Types</option>
             <option>Sewing Accessories</option>
@@ -674,9 +674,15 @@ export default function Page() {
           </select>
           <label>SP #</label>
           <input placeholder="Type SP #" value={spFilter} onChange={(e) => setSpFilter(e.target.value)} />
-          <button onClick={() => { setDateFilter(''); setTypeFilter('All Accessory Types'); setSpFilter(''); }}>Clear Filters</button>
-          <button className="refresh-button" onClick={() => { void loadTransactionsFromSheet(); }}>{loadingTransactions ? 'Loading...' : 'Refresh Report'}</button>
-          <button className={`delete-tab ${deleteAuthorized ? 'active' : ''}`} onClick={openDeleteLogin}>Delete</button>
+          <button onClick={() => { setDateFilter(''); setTypeFilter('All Accessory Types'); setSpFilter(''); }}>
+            <span className="label-stack command-label"><span>Clear Filters</span><span>ត្រលប់មកវិញ</span></span>
+          </button>
+          <button className="refresh-button" onClick={() => { void loadTransactionsFromSheet(); }}>
+            {loadingTransactions ? 'Loading...' : <span className="label-stack command-label"><span>Refresh Report</span><span>ទំព័រថ្មី</span></span>}
+          </button>
+          <button className={`delete-tab ${deleteAuthorized ? 'active' : ''}`} onClick={openDeleteLogin}>
+            <span className="label-stack command-label"><span>Delete</span><span>លុប</span></span>
+          </button>
         </div>
 
         <div className="table-scroll">
