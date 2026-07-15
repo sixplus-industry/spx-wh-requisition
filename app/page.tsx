@@ -618,11 +618,11 @@ export default function Page() {
         <div className="card requester-card">
           <h2>REQUESTER INFORMATION <span>ព័ត៌មានអ្នកស្នើសុំ</span></h2>
           <div className="requester-grid">
-            <label>Employee #</label>
+            <label className="label-stack"><span>Employee</span><span>អត្តលេខ</span></label>
             <input className="yellow" value={employeeNo} onChange={(e) => handleEmployeeNoChange(e.target.value)} />
-            <label>Section</label>
+            <label className="label-stack"><span>Section</span><span>ផ្នែក</span></label>
             <input className="disabled" value={section} disabled />
-            <label>Name</label>
+            <label className="label-stack"><span>Name</span><span>ឈ្មោះ</span></label>
             <input className="disabled name-input" value={name} disabled />
           </div>
           <button className="primary-button" onClick={continueRequester} disabled={loadingRequester || !requesterReady}>
@@ -634,21 +634,25 @@ export default function Page() {
           <h2>Accessory Request <span>ប្រភេទគ្រឿងសម្ភារៈត្រូវស្នើសុំ</span></h2>
           <div className="accessory-row top-row">
             <div className="tabs">
-              <button disabled={!accessoryUnlocked} className={accessoryType === 'Sewing Accessories' ? 'active' : ''} onClick={() => selectAccessoryType('Sewing Accessories')}>Sewing Accessories</button>
-              <button disabled={!accessoryUnlocked} className={accessoryType === 'Packing Accessories' ? 'active' : ''} onClick={() => selectAccessoryType('Packing Accessories')}>Packing Accessories</button>
+              <button disabled={!accessoryUnlocked} className={accessoryType === 'Sewing Accessories' ? 'active' : ''} onClick={() => selectAccessoryType('Sewing Accessories')}>
+                <span className="label-stack"><span>Sewing Accessories</span><span>សម្ភារៈដេរ</span></span>
+              </button>
+              <button disabled={!accessoryUnlocked} className={accessoryType === 'Packing Accessories' ? 'active' : ''} onClick={() => selectAccessoryType('Packing Accessories')}>
+                <span className="label-stack"><span>Packing Accessories</span><span>សម្ភារៈវិចខ្ចប់</span></span>
+              </button>
             </div>
-            <label>Items</label>
+            <label className="label-stack"><span>Item</span><span>វត្ថុ</span></label>
             <select disabled={!accessoryUnlocked || loadingItems} className="yellow item-select" value={item} onChange={(e) => setItem(e.target.value)}>
               <option value="">{loadingItems ? 'Loading Items...' : itemOptions.length ? 'Select Item...' : 'No items found'}</option>
               {itemOptions.map((option) => <option key={option}>{option}</option>)}
             </select>
           </div>
           <div className="accessory-row input-row">
-            <label>SP #</label>
+            <label className="label-stack"><span>SP#</span><span>លេខ SP</span></label>
             <input disabled={!accessoryUnlocked} className="yellow sp-input" value={sp} onChange={(e) => handleSpChange(e.target.value)} />
-            <label>Size</label>
+            <label className="label-stack"><span>Size</span><span>ទំហំ</span></label>
             <input disabled={!accessoryUnlocked} className="yellow size-input" value={size} onChange={(e) => setSize(e.target.value)} />
-            <label>Style</label>
+            <label className="label-stack"><span>Style</span><span>ម៉ូត</span></label>
             <input className="disabled style-input" value={loadingStyle ? 'Loading...' : style} disabled />
           </div>
           <button className="primary-button" disabled={!accessoryComplete} onClick={sendRequest}>{savingRequest ? 'SAVING...' : 'SEND REQUEST បញ្ជូនការស្នើសុំ'}</button>

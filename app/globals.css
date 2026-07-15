@@ -36,6 +36,9 @@ button:disabled, input:disabled, select:disabled { cursor: not-allowed; }
 .google-login:hover { background: var(--red-dark); border-color: var(--red-dark); }
 .requester-grid { display: grid; grid-template-columns: 112px 1fr 88px .9fr; gap: 22px 16px; align-items: center; }
 label { color: var(--red); font-size: 20px; font-weight: 900; line-height: 1.15; white-space: nowrap; }
+.label-stack { display: inline-flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; line-height: 1.08; white-space: normal; }
+.label-stack span:first-child { font-size: 20px; font-weight: 900; }
+.label-stack span:last-child { font-size: 17px; font-weight: 900; }
 label a { color: inherit; text-underline-offset: 3px; }
 label a:hover { color: var(--red-dark); }
 input, select { min-height: 52px; border: 1px solid #d9dee7; border-radius: 8px; padding: 0 16px; outline: none; color: var(--text); background: white; box-shadow: inset 0 1px 2px rgba(16, 24, 40, .04); }
@@ -53,6 +56,9 @@ input:focus, select:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba
 .top-row { justify-content: space-between; }
 .tabs { display: flex; background: #f8fafc; border: 1px solid #e4e7ec; border-radius: 8px; padding: 6px; }
 .tabs button { min-width: 205px; height: 52px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font-weight: 900; }
+.tabs .label-stack { align-items: center; }
+.tabs .label-stack span:first-child { font-size: 16px; }
+.tabs .label-stack span:last-child { font-size: 14px; }
 .tabs .active { background: var(--red); color: white; box-shadow: 0 8px 14px rgba(185, 28, 28, .18); }
 .item-select { width: 320px; }
 .input-row { margin-top: 22px; }
