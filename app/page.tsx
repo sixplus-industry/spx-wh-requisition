@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 type User = { name?: string; email?: string; picture?: string } | null;
+const ADMIN_EMAILS = new Set(['sportex769@gmail.com']);
 type DriveFile = { id: string; name: string; mimeType: string; modifiedTime?: string; webViewLink?: string };
 type Transaction = {
   sheetRow?: number | null;
@@ -468,6 +469,7 @@ export default function Page() {
   }
 
   function protectedFieldsLocked(row: Transaction) {
+    if (ADMIN_EMAILS.has(String(user?.email ?? '').trim().toLowerCase())) return false;
     return row.restricted !== false;
   }
 

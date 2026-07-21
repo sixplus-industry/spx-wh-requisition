@@ -7,6 +7,7 @@ export const runtime = 'nodejs';
 
 const TRANSACTION_RANGE = 'Transaction!A:P';
 const RESTRICTIONS_RANGE = 'Restrictions!A:H';
+const ADMIN_EMAILS = new Set(['sportex769@gmail.com']);
 
 type TransactionPayload = {
   dateRequested?: string;
@@ -117,6 +118,10 @@ function protectedValueChanged(current: string, next: unknown) {
   return String(current ?? '').trim() !== String(next ?? '').trim();
 }
 
+function isAdminEmail(email?: string) {
+  return ADMIN_EMAILS.has(String(email ?? '').trim().toLowerCase());
+}
+
 function nextTransactionRow(values: string[][] = []) {
   const lastUsedIndex = values.reduce((last, row, index) => (
     row.some((value) => String(value ?? '').trim()) ? index : last
@@ -196,6 +201,7 @@ export async function GET(req: Request) {
     return Response.json({ error: sheetAccessError(restrictedResult.error) }, { status: restrictedResult.error.status });
   }
 
+  const isAdmin = isAdminEmail(session.email);
   const restrictedEmployees = restrictedResult.data;
   const rows = (result.data.values ?? [])
     .slice(1)
@@ -203,7 +209,7 @@ export async function GET(req: Request) {
       const transaction = transactionFromRow(row, index + 2);
       return {
         ...transaction,
-        restricted: restrictedEmployees.has(normalizeEmployeeNo(transaction.employeeNo))
+        restricted: isAdmin ? false : restrictedEmployees.has(normalizeEmployeeNo(transaction.employeeNo))
       };
     })
     .filter((row) => [
@@ -244,7 +250,7 @@ export async function PATCH(req: Request) {
   if ('error' in restrictedResult) {
     return Response.json({ error: sheetAccessError(restrictedResult.error) }, { status: restrictedResult.error.status });
   }
-  const isRestricted = restrictedResult.data.has(normalizeEmployeeNo(currentRow.employeeNo));
+  const isRestricted = !isAdminEmail(session.email) && restrictedResult.data.has(normalizeEmployeeNo(currentRow.employeeNo));
   if (isRestricted && (
     protectedValueChanged(currentRow.actualQty, body.fields?.actualQty) ||
     protectedValueChanged(currentRow.status, body.fields?.status) ||
