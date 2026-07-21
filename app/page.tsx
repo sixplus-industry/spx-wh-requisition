@@ -22,6 +22,7 @@ type Transaction = {
   detailedRemark?: string;
   wbStatus?: string;
   wbRemarks?: string;
+  restricted?: boolean;
 };
 
 type ImportSheets = Record<string, unknown[]>;
@@ -68,6 +69,12 @@ function requestedDateTimeParts(value?: string) {
   const normalized = raw.replace('T', ' ').trim();
   const [date = '', time = ''] = normalized.split(/\s+/);
   return { date, time };
+}
+
+function requestedDateTimeSortValue(value?: string) {
+  const { date, time } = requestedDateTimeParts(value);
+  const timestamp = Date.parse(`${date}T${time || '00:00:00'}`);
+  return Number.isFinite(timestamp) ? timestamp : 0;
 }
 
 function formatRequestedDateTime(date: Date) {
@@ -289,12 +296,15 @@ export default function Page() {
     };
   }, [employeeNo]);
 
-  const filtered = useMemo(() => transactions.filter((row) => {
-    const dateOk = !dateFilter || requestedDateTimeParts(row.dateRequested).date === dateFilter;
-    const typeOk = typeFilter === 'All Accessory Types' || row.accessoryType === typeFilter;
-    const spOk = !spFilter || (row.sp ?? '').toLowerCase().includes(spFilter.toLowerCase());
-    return dateOk && typeOk && spOk;
-  }), [transactions, dateFilter, typeFilter, spFilter]);
+  const filtered = useMemo(() => transactions
+    .filter((row) => {
+      const dateOk = !dateFilter || requestedDateTimeParts(row.dateRequested).date === dateFilter;
+      const typeOk = typeFilter === 'All Accessory Types' || row.accessoryType === typeFilter;
+      const spOk = !spFilter || (row.sp ?? '').toLowerCase().includes(spFilter.toLowerCase());
+      return dateOk && typeOk && spOk;
+    })
+    .sort((a, b) => requestedDateTimeSortValue(b.dateRequested) - requestedDateTimeSortValue(a.dateRequested)),
+  [transactions, dateFilter, typeFilter, spFilter]);
 
   function handleEmployeeNoChange(value: string) {
     setEmployeeNo(value);
@@ -361,7 +371,8 @@ export default function Page() {
       status: String(row.status ?? ''),
       detailedRemark: String(row.detailedRemark ?? ''),
       wbStatus: String(row.wbStatus ?? ''),
-      wbRemarks: String(row.wbRemarks ?? '')
+      wbRemarks: String(row.wbRemarks ?? ''),
+      restricted: Boolean(row.restricted)
     };
   }
 
@@ -744,20 +755,21 @@ export default function Page() {
                 <tr key={`${row.sp}-${index}`}>
                   {(() => {
                     const wbEnabled = row.status === 'Ready for Pick Up';
+                    const restricted = Boolean(row.restricted);
                     return (
                       <>
                   <td className="date-time-cell">
                     <span>{requestedDateTimeParts(row.dateRequested).date}</span>
                     {requestedDateTimeParts(row.dateRequested).time && <span>{requestedDateTimeParts(row.dateRequested).time}</span>}
                   </td><td>{row.line}</td><td>{row.employeeNo}</td><td>{row.name}</td><td>{accessoryTypeDisplay(row.accessoryType)}</td><td>{row.item}</td><td>{row.size}</td><td>{row.sp}</td><td>{row.style}</td><td>{row.inlineDate}</td><td>{row.orderQty}</td>
-                  <td><input className="table-input" type="number" value={row.actualQty ?? ''} onChange={(e) => updateTransaction(row, e.target.value === '' ? { actualQty: undefined, status: '', wbStatus: '' } : { actualQty: Number(e.target.value) })} onBlur={() => syncTransactionFields(row)} /></td>
+                  <td><input className="table-input" type="number" disabled={restricted} value={row.actualQty ?? ''} onChange={(e) => updateTransaction(row, e.target.value === '' ? { actualQty: undefined, status: '', wbStatus: '' } : { actualQty: Number(e.target.value) })} onBlur={() => syncTransactionFields(row)} /></td>
                   <td className={whStatusClass(row.status)}>
-                    <select className="table-select" value={row.status || ''} onChange={(e) => handleWhStatusChange(row, e.target.value)}>
+                    <select className="table-select" disabled={restricted} value={row.status || ''} onChange={(e) => handleWhStatusChange(row, e.target.value)}>
                       <option value=""></option>
                       {whStatusOptions.map((option) => <option key={option} value={option}>{whStatusLabels[option]}</option>)}
                     </select>
                   </td>
-                  <td><input className="table-input wide" value={row.detailedRemark ?? ''} onChange={(e) => updateTransaction(row, { detailedRemark: e.target.value })} onBlur={() => syncTransactionFields(row)} /></td>
+                  <td><input className="table-input wide" disabled={restricted} value={row.detailedRemark ?? ''} onChange={(e) => updateTransaction(row, { detailedRemark: e.target.value })} onBlur={() => syncTransactionFields(row)} /></td>
                   <td>
                     <select className="table-select" disabled={!wbEnabled} value={wbEnabled ? row.wbStatus || '' : ''} onChange={(e) => handleWbStatusChange(row, e.target.value)}>
                       <option value=""></option>

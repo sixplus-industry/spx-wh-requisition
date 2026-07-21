@@ -1,11 +1,12 @@
 import { requireSession } from '@/lib/session';
 import { getGoogleSheetId } from '@/lib/sheets';
-import { googleSheetsJson, sheetAccessError } from '@/app/api/google-drive/sheets-debug';
+import { googleSheetsJson, sheetAccessError, type GoogleApiError } from '@/app/api/google-drive/sheets-debug';
 import { readSheetValues } from '@/lib/sheet-values';
 
 export const runtime = 'nodejs';
 
 const TRANSACTION_RANGE = 'Transaction!A:P';
+const RESTRICTIONS_RANGE = 'Restrictions!A:H';
 
 type TransactionPayload = {
   dateRequested?: string;
@@ -87,6 +88,30 @@ function transactionFromRow(row: string[], sheetRow: number) {
   };
 }
 
+function normalizeEmployeeNo(value?: string) {
+  const normalized = String(value ?? '').trim().replace(/\s+/g, '');
+  return normalized.replace(/^0+/, '') || normalized;
+}
+
+function restrictedEmployeeSet(values: string[][] = []) {
+  return new Set(
+    values
+      .slice(1)
+      .map((row) => normalizeEmployeeNo(row[0]))
+      .filter(Boolean)
+  );
+}
+
+async function readRestrictedEmployees(spreadsheetId: string, accessToken: string): Promise<{ data: Set<string> } | { error: GoogleApiError }> {
+  const result = await readSheetValues(spreadsheetId, RESTRICTIONS_RANGE, accessToken, 'Restrictions lookup');
+  if ('error' in result) return { error: result.error };
+  return { data: restrictedEmployeeSet(result.data.values) };
+}
+
+function protectedValueChanged(current: string, next: unknown) {
+  return String(current ?? '').trim() !== String(next ?? '').trim();
+}
+
 function nextTransactionRow(values: string[][] = []) {
   const lastUsedIndex = values.reduce((last, row, index) => (
     row.some((value) => String(value ?? '').trim()) ? index : last
@@ -161,9 +186,21 @@ export async function GET(req: Request) {
   }
 
   const includeCompleted = new URL(req.url).searchParams.get('includeCompleted') === '1';
+  const restrictedResult = await readRestrictedEmployees(spreadsheetId, session.accessToken);
+  if ('error' in restrictedResult) {
+    return Response.json({ error: sheetAccessError(restrictedResult.error) }, { status: restrictedResult.error.status });
+  }
+
+  const restrictedEmployees = restrictedResult.data;
   const rows = (result.data.values ?? [])
     .slice(1)
-    .map((row, index) => transactionFromRow(row, index + 2))
+    .map((row, index) => {
+      const transaction = transactionFromRow(row, index + 2);
+      return {
+        ...transaction,
+        restricted: restrictedEmployees.has(normalizeEmployeeNo(transaction.employeeNo))
+      };
+    })
     .filter((row) => [
       row.dateRequested,
       row.line,
@@ -191,6 +228,25 @@ export async function PATCH(req: Request) {
     fields?: Pick<TransactionPayload, 'actualQty' | 'status' | 'detailedRemark' | 'wbStatus' | 'wbRemarks'>;
   };
   if (!body.sheetRow || body.sheetRow < 2) return Response.json({ error: 'sheetRow is required' }, { status: 400 });
+
+  const currentRange = `Transaction!A${body.sheetRow}:P${body.sheetRow}`;
+  const currentResult = await readSheetValues(spreadsheetId, currentRange, session.accessToken, 'Transaction restriction check');
+  if ('error' in currentResult) {
+    return Response.json({ error: sheetAccessError(currentResult.error) }, { status: currentResult.error.status });
+  }
+  const currentRow = transactionFromRow(currentResult.data.values?.[0] ?? [], body.sheetRow);
+  const restrictedResult = await readRestrictedEmployees(spreadsheetId, session.accessToken);
+  if ('error' in restrictedResult) {
+    return Response.json({ error: sheetAccessError(restrictedResult.error) }, { status: restrictedResult.error.status });
+  }
+  const isRestricted = restrictedResult.data.has(normalizeEmployeeNo(currentRow.employeeNo));
+  if (isRestricted && (
+    protectedValueChanged(currentRow.actualQty, body.fields?.actualQty) ||
+    protectedValueChanged(currentRow.status, body.fields?.status) ||
+    protectedValueChanged(currentRow.detailedRemark, body.fields?.detailedRemark)
+  )) {
+    return Response.json({ error: 'This row is restricted. Actual Qty, WH Status, and Detailed Remark cannot be edited.' }, { status: 403 });
+  }
 
   const range = `Transaction!L${body.sheetRow}:P${body.sheetRow}`;
   console.log('[Transaction update] GOOGLE_SHEET_ID:', spreadsheetId);
