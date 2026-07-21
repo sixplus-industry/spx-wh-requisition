@@ -156,7 +156,7 @@ export async function POST(req: Request) {
   console.log('[Transaction write] Google Sheets write range:', writeRange);
   console.log('[Transaction write] Google API method: spreadsheets.values.update');
 
-  const params = new URLSearchParams({ valueInputOption: 'USER_ENTERED' });
+  const params = new URLSearchParams({ valueInputOption: 'RAW' });
   const updateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(writeRange)}?${params.toString()}`;
   const result = await googleSheetsJson<UpdateResponse>(updateUrl, session.accessToken, {
     method: 'PUT',
