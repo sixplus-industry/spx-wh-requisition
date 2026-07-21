@@ -42,6 +42,10 @@ const accessoryTypeFilterOptions = [
   { value: 'Sewing Accessories', label: 'សម្ភារៈដេរ Sewing Accessories' },
   { value: 'Packing Accessories', label: 'សម្ភារៈវិចខ្ចប់ Packing Accessories' }
 ];
+const accessoryTypeTableLabels: Record<string, string> = {
+  'Sewing Accessories': 'សម្ភារៈដេរ Sewing Accessories',
+  'Packing Accessories': 'សម្ភារៈវិចខ្ចប់ Packing Accessories'
+};
 const tableColumnWidths = [126, 68, 118, 128, 154, 116, 64, 118, 128, 112, 104, 104, 164, 228, 176, 228];
 const deleteColumnWidth = 108;
 
@@ -74,6 +78,11 @@ function formatRequestedDateTime(date: Date) {
   const min = padTime(date.getMinutes());
   const ss = padTime(date.getSeconds());
   return `${yyyy}-${mm}-${dd}\n${hh}:${min}:${ss}`;
+}
+
+function accessoryTypeDisplay(value?: string) {
+  const trimmed = String(value ?? '').trim();
+  return accessoryTypeTableLabels[trimmed] ?? trimmed;
 }
 
 export default function Page() {
@@ -740,7 +749,7 @@ export default function Page() {
                   <td className="date-time-cell">
                     <span>{requestedDateTimeParts(row.dateRequested).date}</span>
                     {requestedDateTimeParts(row.dateRequested).time && <span>{requestedDateTimeParts(row.dateRequested).time}</span>}
-                  </td><td>{row.line}</td><td>{row.employeeNo}</td><td>{row.name}</td><td>{row.accessoryType}</td><td>{row.item}</td><td>{row.size}</td><td>{row.sp}</td><td>{row.style}</td><td>{row.inlineDate}</td><td>{row.orderQty}</td>
+                  </td><td>{row.line}</td><td>{row.employeeNo}</td><td>{row.name}</td><td>{accessoryTypeDisplay(row.accessoryType)}</td><td>{row.item}</td><td>{row.size}</td><td>{row.sp}</td><td>{row.style}</td><td>{row.inlineDate}</td><td>{row.orderQty}</td>
                   <td><input className="table-input" type="number" value={row.actualQty ?? ''} onChange={(e) => updateTransaction(row, e.target.value === '' ? { actualQty: undefined, status: '', wbStatus: '' } : { actualQty: Number(e.target.value) })} onBlur={() => syncTransactionFields(row)} /></td>
                   <td className={whStatusClass(row.status)}>
                     <select className="table-select" value={row.status || ''} onChange={(e) => handleWhStatusChange(row, e.target.value)}>
