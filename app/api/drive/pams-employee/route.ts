@@ -19,6 +19,11 @@ function normalizeEmployeeNo(value: string) {
   return value.trim().replace(/\s+/g, '').toLowerCase();
 }
 
+function formatEmployeeNo(value: string) {
+  const trimmed = value.trim().replace(/\s+/g, '');
+  return /^\d+$/.test(trimmed) ? trimmed.padStart(6, '0') : trimmed;
+}
+
 function cell(row: string[], headers: string[], aliases: string[]) {
   const index = headers.findIndex((header) => aliases.includes(header));
   return index >= 0 ? String(row[index] ?? '').trim() : '';
@@ -50,7 +55,7 @@ export async function GET(req: Request) {
 
   return Response.json({
     employee: {
-      employeeNo: cell(match, headers, employeeKeys) || employeeNo.trim(),
+      employeeNo: formatEmployeeNo(cell(match, headers, employeeKeys) || employeeNo.trim()),
       section: cell(match, headers, sectionKeys),
       name: cell(match, headers, nameKeys)
     }

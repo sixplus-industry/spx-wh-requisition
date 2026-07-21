@@ -92,6 +92,11 @@ function accessoryTypeDisplay(value?: string) {
   return accessoryTypeTableLabels[trimmed] ?? trimmed;
 }
 
+function formatEmployeeNo(value?: string) {
+  const trimmed = String(value ?? '').trim().replace(/\s+/g, '');
+  return /^\d+$/.test(trimmed) ? trimmed.padStart(6, '0') : trimmed;
+}
+
 export default function Page() {
   const [user, setUser] = useState<User>(null);
   const [employeeNo, setEmployeeNo] = useState('');
@@ -282,8 +287,10 @@ export default function Page() {
         return;
       }
 
+      const loadedEmployeeNo = data.employee?.employeeNo ? formatEmployeeNo(data.employee.employeeNo) : trimmedEmployeeNo;
       const loadedSection = data.employee?.section || '-';
       const loadedName = data.employee?.name || '-';
+      setEmployeeNo(loadedEmployeeNo);
       setSection(loadedSection);
       setName(loadedName);
       setRequesterReady(Boolean(loadedSection && loadedSection !== '-' && loadedName && loadedName !== '-'));
@@ -358,7 +365,7 @@ export default function Page() {
       sheetRow: typeof row.sheetRow === 'number' ? row.sheetRow : null,
       dateRequested: String(row.dateRequested ?? ''),
       line: String(row.line ?? ''),
-      employeeNo: String(row.employeeNo ?? ''),
+      employeeNo: formatEmployeeNo(String(row.employeeNo ?? '')),
       name: String(row.name ?? ''),
       accessoryType: String(row.accessoryType ?? ''),
       item: String(row.item ?? ''),
@@ -408,7 +415,7 @@ export default function Page() {
     const newTransaction: Transaction = {
       dateRequested: requestedAt,
       line: scheduleLine,
-      employeeNo,
+      employeeNo: formatEmployeeNo(employeeNo),
       name,
       accessoryType,
       item,
@@ -594,7 +601,7 @@ export default function Page() {
     const mapped: Transaction[] = rows.map((row) => ({
                   dateRequested: String(row['Date Requested'] ?? ''),
       line: String(row.Line ?? ''),
-      employeeNo: String(row['Employee #'] ?? ''),
+      employeeNo: formatEmployeeNo(String(row['Employee #'] ?? '')),
       name: String(row.Name ?? ''),
       accessoryType: String(row['Accessory Type'] ?? ''),
       item: String(row.Items ?? ''),

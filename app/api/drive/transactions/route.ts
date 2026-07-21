@@ -45,11 +45,16 @@ function cell(value: unknown) {
   return String(value);
 }
 
+function formatEmployeeNo(value?: string) {
+  const trimmed = String(value ?? '').trim().replace(/\s+/g, '');
+  return /^\d+$/.test(trimmed) ? trimmed.padStart(6, '0') : trimmed;
+}
+
 function rowValues(transaction: TransactionPayload) {
   return [
     cell(transaction.dateRequested),
     cell(transaction.line),
-    cell(transaction.employeeNo),
+    formatEmployeeNo(transaction.employeeNo),
     cell(transaction.name),
     cell(transaction.accessoryType),
     cell(transaction.item),
@@ -71,7 +76,7 @@ function transactionFromRow(row: string[], sheetRow: number) {
     sheetRow,
     dateRequested: cell(row[0]),
     line: cell(row[1]),
-    employeeNo: cell(row[2]),
+    employeeNo: formatEmployeeNo(cell(row[2])),
     name: cell(row[3]),
     accessoryType: cell(row[4]),
     item: cell(row[5]),
