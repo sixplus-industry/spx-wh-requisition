@@ -379,7 +379,7 @@ export default function Page() {
       detailedRemark: String(row.detailedRemark ?? ''),
       wbStatus: String(row.wbStatus ?? ''),
       wbRemarks: String(row.wbRemarks ?? ''),
-      restricted: Boolean(row.restricted)
+      restricted: typeof row.restricted === 'boolean' ? row.restricted : undefined
     };
   }
 
@@ -444,7 +444,8 @@ export default function Page() {
       return;
     }
 
-    setTransactions((prev) => [{ ...newTransaction, sheetRow: typeof data.sheetRow === 'number' ? data.sheetRow : null }, ...prev]);
+    setTransactions((prev) => [{ ...newTransaction, sheetRow: typeof data.sheetRow === 'number' ? data.sheetRow : null, restricted: undefined }, ...prev]);
+    void loadTransactionsFromSheet(true);
     setEmployeeNo('');
     setSection('-');
     setName('-');
@@ -464,6 +465,10 @@ export default function Page() {
     const next = { ...target, ...patch };
     setTransactions((prev) => prev.map((row) => (row === target ? next : row)));
     return next;
+  }
+
+  function protectedFieldsLocked(row: Transaction) {
+    return row.restricted !== false;
   }
 
   async function syncTransactionFields(row: Transaction) {
@@ -488,18 +493,25 @@ export default function Page() {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      setMessage(errorMessage(data, 'Transaction sheet update failed.'));
+      const message = errorMessage(data, 'Transaction sheet update failed.');
+      setMessage(message);
+      if (res.status === 403 && message.toLowerCase().includes('restricted')) {
+        updateTransaction(row, { restricted: true });
+        void loadTransactionsFromSheet(true);
+      }
       return;
     }
     setMessage('Transaction sheet updated.');
   }
 
   function updateAndSyncTransaction(target: Transaction, patch: Partial<Transaction>) {
+    if (protectedFieldsLocked(target) && ('actualQty' in patch || 'status' in patch || 'detailedRemark' in patch)) return;
     const next = updateTransaction(target, patch);
     void syncTransactionFields(next);
   }
 
   function handleWhStatusChange(row: Transaction, value: string) {
+    if (protectedFieldsLocked(row)) return;
     const patch: Partial<Transaction> = value === 'Ready for Pick Up'
       ? { status: value }
       : { status: value, wbStatus: '', wbRemarks: '' };
@@ -762,21 +774,21 @@ export default function Page() {
                 <tr key={`${row.sp}-${index}`}>
                   {(() => {
                     const wbEnabled = row.status === 'Ready for Pick Up';
-                    const restricted = Boolean(row.restricted);
+                    const restricted = protectedFieldsLocked(row);
                     return (
                       <>
                   <td className="date-time-cell">
                     <span>{requestedDateTimeParts(row.dateRequested).date}</span>
                     {requestedDateTimeParts(row.dateRequested).time && <span>{requestedDateTimeParts(row.dateRequested).time}</span>}
                   </td><td>{row.line}</td><td>{row.employeeNo}</td><td>{row.name}</td><td>{accessoryTypeDisplay(row.accessoryType)}</td><td>{row.item}</td><td>{row.size}</td><td>{row.sp}</td><td>{row.style}</td><td>{row.inlineDate}</td><td>{row.orderQty}</td>
-                  <td><input className="table-input" type="number" disabled={restricted} value={row.actualQty ?? ''} onChange={(e) => updateTransaction(row, e.target.value === '' ? { actualQty: undefined, status: '', wbStatus: '' } : { actualQty: Number(e.target.value) })} onBlur={() => syncTransactionFields(row)} /></td>
+                  <td><input className="table-input" type="number" disabled={restricted} value={row.actualQty ?? ''} onChange={(e) => { if (!restricted) updateTransaction(row, e.target.value === '' ? { actualQty: undefined, status: '', wbStatus: '' } : { actualQty: Number(e.target.value) }); }} onBlur={() => { if (!restricted) void syncTransactionFields(row); }} /></td>
                   <td className={whStatusClass(row.status)}>
                     <select className="table-select" disabled={restricted} value={row.status || ''} onChange={(e) => handleWhStatusChange(row, e.target.value)}>
                       <option value=""></option>
                       {whStatusOptions.map((option) => <option key={option} value={option}>{whStatusLabels[option]}</option>)}
                     </select>
                   </td>
-                  <td><input className="table-input wide" disabled={restricted} value={row.detailedRemark ?? ''} onChange={(e) => updateTransaction(row, { detailedRemark: e.target.value })} onBlur={() => syncTransactionFields(row)} /></td>
+                  <td><input className="table-input wide" disabled={restricted} value={row.detailedRemark ?? ''} onChange={(e) => { if (!restricted) updateTransaction(row, { detailedRemark: e.target.value }); }} onBlur={() => { if (!restricted) void syncTransactionFields(row); }} /></td>
                   <td>
                     <select className="table-select" disabled={!wbEnabled} value={wbEnabled ? row.wbStatus || '' : ''} onChange={(e) => handleWbStatusChange(row, e.target.value)}>
                       <option value=""></option>
